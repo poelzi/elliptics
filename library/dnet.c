@@ -1338,7 +1338,7 @@ int dnet_write_file(struct dnet_node *n, char *file, char *name, unsigned char *
 	if (!err && error)
 		err = error;
 
-	if (err)
+	if (err || !trans_num)
 		dnet_log(n, DNET_LOG_ERROR, "Failed to write file '%s' into the storage, err: %d.\n", file, err);
 	else
 		dnet_log(n, DNET_LOG_INFO, "Successfully wrote file: '%s' into the storage, size: %llu.\n",
@@ -1346,6 +1346,9 @@ int dnet_write_file(struct dnet_node *n, char *file, char *name, unsigned char *
 
 	close(fd);
 	dnet_wait_put(w);
+
+	if(!trans_num)
+		return -1;
 
 	return err;
 
