@@ -136,12 +136,13 @@ int dnet_read_object(struct dnet_node *n, struct dnet_io_control *ctl);
  * Reads given file from the storage. If there are multiple transformation functions,
  * they will be tried one after another.
  *
- * If @id is set, it is used as a main object ID, otherwise @file transformation
+ * @file is the file to which the file of @name will be written.
+ * If @id is set, it is used as a main object ID, otherwise @name transformation
  * is used as object ID.
  *
  * Returns negative error value in case of error.
  */
-int dnet_read_file(struct dnet_node *n, char *file, unsigned char *id,
+int dnet_read_file(struct dnet_node *n, char *file, char *name, unsigned char *id,
 		uint64_t offset, uint64_t size, int hist);
 
 /*
@@ -172,9 +173,10 @@ int dnet_write_object(struct dnet_node *n, struct dnet_io_control *ctl, void *re
 /*
  * Sends given file to the remote nodes and waits until all of them ack the write.
  *
+ * @file is the file which will be read and saved as @name transformations.
  * Returns negative error value in case of error.
  */
-int dnet_write_file(struct dnet_node *n, char *file, unsigned char *id,
+int dnet_write_file(struct dnet_node *n, char *file, char *name, unsigned char *id,
 		uint64_t offset, uint64_t size, unsigned int aflags);
 
 /*
@@ -641,7 +643,7 @@ int dnet_remove_object(struct dnet_node *n,
 /*
  * Remove given file (identified by name or ID) from the storage.
  */
-int dnet_remove_file(struct dnet_node *n, char *file, unsigned char *file_id);
+int dnet_remove_file(struct dnet_node *n, char *file, char *name, unsigned char *file_id);
 
 #ifdef __cplusplus
 }
