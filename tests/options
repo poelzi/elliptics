@@ -1,4 +1,4 @@
-log_mask=15
+log_mask=FF
 
 ioserv=../example/dnet_ioserv
 server_opt="-D $1"

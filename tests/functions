@@ -52,8 +52,16 @@ function start_node()
 
 function start_server()
 {
-	num=$2
-	opt="-a $1 -d $tmpdir/root$num -j -l $tmpdir/log-server-$num -m $log_mask $3"
+	local num=$2
+	local hash="-T sha1 "
+	if [ "$4x" != "x" ]; then
+		COUNTER=0
+		while [  $COUNTER -lt $4 ]; do
+			hash="$hash -T jhash "
+			let COUNTER=COUNTER+1 
+		done
+	fi
+	opt="-a $1 -d $tmpdir/root$num -j -l $tmpdir/log-server-$num -m $log_mask $3 $hash"
 
 	log -en "Starting server: $daemon_start_string $opt ... "
 	start_node "$opt"
@@ -70,7 +78,7 @@ function kill_servers()
 
 	for pid in `cat $tmpdir/pids | awk {'print $1'}`; do
 		log "Killing $pid"
-		kill $pid
+		kill $pid 2>/dev/null
 	done
 
 	rm -f $tmpdir/pids
@@ -88,6 +96,16 @@ function data_io()
 	local test_file=$6
 	local test_id=$7
 
+	local hash="-T sha1 "
+	if [ "x$8" != "x" ]; then
+		COUNTER=0
+		while [  $COUNTER -lt $8 ]; do
+			hash="$hash -T jhash "
+			let COUNTER=COUNTER+1 
+		done
+	fi
+
+
 	local opt="-S $size -O $offset"
 
 	if test $operation = "read"; then
@@ -100,11 +118,14 @@ function data_io()
 		die "Unsupported operation $operation" -95
 	fi
 
-	if test x$test_id != x; then
+	if test x$test_id != x && test x$test_id != x-1; then
 		opt="$opt -I $test_id"
+    else
+        local name=`basename ${test_file%%_[a-z]*}`
+        opt="$opt -n $name"
 	fi
 
-	log "Starting client: $ioserv -a $addr -r $serv -l $tmpdir/log-client-$operation-$idx -m $log_mask -T sha1 $opt ... "
+	log "Starting client: $ioserv -a $addr -r $serv -l $tmpdir/log-client-$operation-$idx -m $log_mask $hash $opt ... "
 	$ioserv -a $addr -r $serv -l $tmpdir/log-client-$operation-$idx -m $log_mask -T sha1 $opt > /dev/null
 	local status=$?
 
@@ -226,4 +247,10 @@ function cmp_files() {
 
 function print_passed() {
 	echo -e '\E[32m  PASSED\E[39;49;00m'
+}
+
+function log_start() {
+    echo "===== $1 =====" >> $tmpdir/log-server-0
+    echo "===== $1 =====" >> $tmpdir/log-server-1
+    echo "$1:"
 }
