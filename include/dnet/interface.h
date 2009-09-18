@@ -642,6 +642,7 @@ int dnet_remove_object(struct dnet_node *n,
 
 /*
  * Remove given file (identified by name or ID) from the storage.
+ * file is the path of the file to remove later.
  */
 int dnet_remove_file(struct dnet_node *n, char *file, char *name, unsigned char *file_id);
 

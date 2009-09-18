@@ -1252,6 +1252,12 @@ int dnet_write_file(struct dnet_node *n, char *file, char *name, unsigned char *
 	void *data;
 	uint64_t off = 0;
 
+	if(!name)
+		name = file;
+
+	dnet_log(n, DNET_LOG_INFO, "Writing file: %s name: %s\n",
+			file, name);
+
 	w = dnet_wait_alloc(0);
 	if (!w) {
 		err = -ENOMEM;
@@ -1313,9 +1319,6 @@ int dnet_write_file(struct dnet_node *n, char *file, char *name, unsigned char *
 	ctl.io.flags = 0;
 	ctl.io.size = size;
 	ctl.io.offset = offset;
-
-	if(!name)
-		name = file;
 
 	error = dnet_write_object(n, &ctl, name, id, 1, &trans_num);
 

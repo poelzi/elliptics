@@ -76,6 +76,7 @@ static void dnet_usage(char *p)
 			" -b <BDB>             - use BerkeleyDB (if present) IO storage backend\n"
 			" -t <TokyoCabinet>    - use TokyoCabinet (if present) IO storage backend\n"
 			" -d root              - root directory to load/store the objects\n"
+			" -n name              - name under which the file is stored\n"
 			" -W file              - write given file to the network storage\n"
 			" -s                   - request stats from all connected nodes\n"
 			" -R file              - read given file from the network into the local storage\n"
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
 	struct dnet_config cfg, rem;
 	struct dnet_crypto_engine *e, *trans[trans_max];
 	char *logfile = NULL, *readf = NULL, *writef = NULL, *cmd = NULL, *lookup = NULL;
-	char *historyf = NULL, *root = NULL, *removef = NULL;
+	char *historyf = NULL, *root = NULL, *removef = NULL, *namef = NULL;
 	unsigned char trans_id[DNET_ID_SIZE], *id = NULL;
 	FILE *log = NULL;
 	uint64_t offset, size;
@@ -127,7 +128,7 @@ int main(int argc, char *argv[])
 
 	memcpy(&rem, &cfg, sizeof(struct dnet_config));
 
-	while ((ch = getopt(argc, argv, "u:M:O:S:P:N:bm:tsH:L:Dc:I:w:l:i:T:W:R:a:r:jd:h")) != -1) {
+	while ((ch = getopt(argc, argv, "u:M:O:S:P:N:bm:n:tsH:L:Dc:I:w:l:i:T:W:R:a:r:jd:h")) != -1) {
 		switch (ch) {
 			case 'u':
 				removef = optarg;
@@ -155,6 +156,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'm':
 				cfg.log_mask = strtoul(optarg, NULL, 0);
+				break;
+			case 'n':
+				namef = optarg;
 				break;
 			case 's':
 				stat = 1;
@@ -297,25 +301,25 @@ int main(int argc, char *argv[])
 	}
 
 	if (writef) {
-		err = dnet_write_file(n, writef, NULL, id, offset, size, 0);
+		err = dnet_write_file(n, writef, namef, id, offset, size, 0);
 		if (err)
 			return err;
 	}
 
 	if (readf) {
-		err = dnet_read_file(n, readf, NULL, id, offset, size, 0);
+		err = dnet_read_file(n, readf, namef, id, offset, size, 0);
 		if (err)
 			return err;
 	}
 
 	if (historyf) {
-		err = dnet_read_file(n, historyf, NULL, id, offset, size, 1);
+		err = dnet_read_file(n, historyf, namef, id, offset, size, 1);
 		if (err)
 			return err;
 	}
 	
 	if (removef) {
-		err = dnet_remove_file(n, removef, NULL, id);
+		err = dnet_remove_file(n, removef, namef, id);
 		if (err)
 			return err;
 	}
